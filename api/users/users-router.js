@@ -41,7 +41,7 @@ router.put('/:id',[validateUserId,validateUser], async(req, res, next) => {
 router.delete('/:id', validateUserId, async(req, res, next) => {
   try {
     const deletedUser = await UserData.remove(req.params.id);
-    res.status(200).json(deletedUser);
+    res.status(200).json(req.user);
   } catch (err) {
     next(err);
   }
@@ -49,7 +49,7 @@ router.delete('/:id', validateUserId, async(req, res, next) => {
 
 router.get('/:id/posts', validateUserId, async(req, res, next) => {
   try {
-    const postOfUser = await PostData.getById(req.params.id);
+    const postOfUser = await UserData.getUserPosts(req.params.id);
     res.status(200).json(postOfUser);
   } catch (err) {
     next(err);
@@ -61,7 +61,10 @@ router.post('/:id/posts',[validateUserId,validatePost], async(req, res, next) =>
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
   try {
-    const newPost = await PostData.insert(req.body);
+    const newPost = await PostData.insert({
+      user_id : req.params.id,
+      text : req.body.text,
+    });
     res.status(201).json(newPost);
   } catch (err) {next(err)}
 });
